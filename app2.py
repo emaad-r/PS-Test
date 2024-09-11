@@ -35,9 +35,10 @@ if uploaded_file is not None:
         # Ensure correct data types
         filtered_data['dimension'] = filtered_data['dimension'].astype(str)
         filtered_data['wm'] = filtered_data['wm'].astype(bool)
+        filtered_data['strategy_response'] = filtered_data['strategy_response'].astype(str)
 
-        # Handle missing vivid_response data
-        filtered_data = filtered_data.dropna(subset=['vivid_response'])
+        # Handle missing vivid_response and strategy_response data
+        filtered_data = filtered_data.dropna(subset=['vivid_response', 'strategy_response'])
 
         st.write("Filtered data with relevant columns:")
         st.dataframe(filtered_data.head())
@@ -63,10 +64,19 @@ if uploaded_file is not None:
         st.pyplot(plt)
 
         # 4.3: Vividness and strategy response by condition
+
+        # Fixing the boxplot to ensure correct handling of data
         st.write("Vividness Response by Dimension and WM Condition")
         plt.figure(figsize=(10, 6))
         sns.boxplot(x="dimension", y="vivid_response", hue="wm", data=filtered_data, palette=color_p)
         plt.title("Vividness Response by Dimension and WM Condition")
+        st.pyplot(plt)
+
+        # 4.4: Strategy response by condition
+        st.write("Strategy Response by Dimension and WM Condition")
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x="dimension", y="strategy_response", hue="wm", data=filtered_data, palette=color_p)
+        plt.title("Strategy Response by Dimension and WM Condition")
         st.pyplot(plt)
 
     except Exception as e:
