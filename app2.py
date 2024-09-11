@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -20,6 +19,10 @@ if uploaded_file is not None:
         # Read the CSV file
         data = pd.read_csv(uploaded_file)
         st.success("File successfully loaded!")
+
+        # Show the column names to help debug missing columns
+        st.write("Column Names in the Data:")
+        st.write(list(data.columns))
 
         # Display the first few rows of the data
         st.write("Here are the first few rows of your data:")
@@ -58,6 +61,7 @@ if uploaded_file is not None:
         st.pyplot(plt)
 
         st.write("Strategy Response by Dimension and WM Condition")
+        # FIXED the issue with 'boxprops' error by simplifying the boxplot.
         plt.figure(figsize=(10, 6))
         sns.boxplot(x="dimension", y="strategy_response", hue="wm", data=filtered_data, palette=color_p)
         plt.title("Strategy Response by Dimension and WM Condition")
