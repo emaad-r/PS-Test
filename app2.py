@@ -46,11 +46,12 @@ if uploaded_file is not None:
         filtered_data['wm'] = filtered_data['wm'].astype(bool)  # Ensure wm is treated as boolean
         filtered_data['strategy_response'] = pd.to_numeric(filtered_data['strategy_response'], errors='coerce')  # Convert strategy_response to numeric
         
-        # Step 5: Handle missing or invalid data (replace or drop as needed)
-        filtered_data = filtered_data.dropna(subset=['vivid_response', 'strategy_response'])  # Drop rows where vivid_response or strategy_response is missing
+        # Step 5: Debug the size of the filtered data
+        st.write("Filtered data size (rows, columns):", filtered_data.shape)
 
-        st.write("Filtered data with relevant columns:")
-        st.dataframe(filtered_data.head())
+        # Debugging: Output a sample of the filtered data
+        st.write("Sample of filtered data:")
+        st.dataframe(filtered_data.sample(10))  # Display 10 random rows of the filtered data
 
         # Debugging: Show unique values in strategy_response and wm to ensure correctness
         st.write("Unique values in 'strategy_response':", filtered_data['strategy_response'].unique())
@@ -60,31 +61,43 @@ if uploaded_file is not None:
 
         # 6.1: Correctness based on conditions
         st.write("Correctness by Dimension, Angle, and WM Condition")
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x="angle", y="key_resp.corr", hue="dimension", data=filtered_data, palette=color_p)
-        plt.title("Correctness by Angle and Dimension")
-        st.pyplot(plt)
+        if not filtered_data.empty:
+            plt.figure(figsize=(10, 6))
+            sns.barplot(x="angle", y="key_resp.corr", hue="dimension", data=filtered_data, palette=color_p)
+            plt.title("Correctness by Angle and Dimension")
+            st.pyplot(plt)
+        else:
+            st.write("No data available for plotting.")
 
         # 6.2: Response time as a function of conditions
         st.write("Response Time by Dimension, Angle, and WM Condition")
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x="angle", y="key_resp.rt", hue="dimension", data=filtered_data, palette=color_p)
-        plt.title("Response Time by Angle and Dimension")
-        st.pyplot(plt)
+        if not filtered_data.empty:
+            plt.figure(figsize=(10, 6))
+            sns.barplot(x="angle", y="key_resp.rt", hue="dimension", data=filtered_data, palette=color_p)
+            plt.title("Response Time by Angle and Dimension")
+            st.pyplot(plt)
+        else:
+            st.write("No data available for plotting.")
 
         # 6.3: Vividness and strategy response by condition
         st.write("Vividness Response by Dimension and WM Condition")
-        plt.figure(figsize=(10, 6))
-        sns.boxplot(x="dimension", y="vivid_response", hue="wm", data=filtered_data, palette=color_p)
-        plt.title("Vividness Response by Dimension and WM Condition")
-        st.pyplot(plt)
+        if not filtered_data.empty:
+            plt.figure(figsize=(10, 6))
+            sns.boxplot(x="dimension", y="vivid_response", hue="wm", data=filtered_data, palette=color_p)
+            plt.title("Vividness Response by Dimension and WM Condition")
+            st.pyplot(plt)
+        else:
+            st.write("No data available for plotting.")
 
         # 6.4: Strategy response by condition
         st.write("Strategy Response by Dimension and WM Condition")
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x="dimension", y="strategy_response", hue="wm", data=filtered_data, palette=color_p)
-        plt.title("Strategy Response by Dimension and WM Condition")
-        st.pyplot(plt)
+        if not filtered_data.empty:
+            plt.figure(figsize=(10, 6))
+            sns.barplot(x="dimension", y="strategy_response", hue="wm", data=filtered_data, palette=color_p)
+            plt.title("Strategy Response by Dimension and WM Condition")
+            st.pyplot(plt)
+        else:
+            st.write("No data available for plotting.")
 
     except Exception as e:
         st.error(f"Error loading file: {e}")
