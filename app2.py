@@ -18,6 +18,7 @@ if uploaded_file is not None:
     try:
         # Read the CSV file
         data = pd.read_csv(uploaded_file)
+
         st.success("File successfully loaded!")
 
         # Show the column names to help debug missing columns
@@ -30,12 +31,20 @@ if uploaded_file is not None:
 
         # Filter columns that are relevant
         filtered_data = data[['dimension', 'angle', 'wm', 'key_resp.corr', 'vivid_response', 'strategy_response', 'key_resp.rt']]
+
+        # Ensure correct data types
+        filtered_data['dimension'] = filtered_data['dimension'].astype(str)
+        filtered_data['wm'] = filtered_data['wm'].astype(bool)
+
+        # Handle missing vivid_response data
+        filtered_data = filtered_data.dropna(subset=['vivid_response'])
+
         st.write("Filtered data with relevant columns:")
         st.dataframe(filtered_data.head())
 
-        # Step 3: Summary Statistics
-        st.write("Summary statistics of the filtered data:")
-        st.write(filtered_data.describe())
+        # Step 3: Check for data in the 2D and wm=False combination
+        st.write("Check for 2D and WM=False Data:")
+        st.write(filtered_data[(filtered_data['dimension'] == '2D') & (filtered_data['wm'] == False)])
 
         # Step 4: Visualizations
 
@@ -58,30 +67,6 @@ if uploaded_file is not None:
         plt.figure(figsize=(10, 6))
         sns.boxplot(x="dimension", y="vivid_response", hue="wm", data=filtered_data, palette=color_p)
         plt.title("Vividness Response by Dimension and WM Condition")
-        st.pyplot(plt)
-
-        st.write("Strategy Response by Dimension and WM Condition")
-        # FIXED the issue with 'boxprops' error by simplifying the boxplot.
-        plt.figure(figsize=(10, 6))
-        sns.boxplot(x="dimension", y="strategy_response", hue="wm", data=filtered_data, palette=color_p)
-        plt.title("Strategy Response by Dimension and WM Condition")
-        st.pyplot(plt)
-
-        # Additional visualizations based on your previous setup
-        # Angular effect on correctness
-        st.write("Angular Effect on Correctness within Conditions")
-        angular_effect = filtered_data.groupby(['dimension', 'angle'])['key_resp.corr'].mean().reset_index()
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x='angle', y='key_resp.corr', hue='dimension', data=angular_effect, palette=color_p)
-        plt.title("Correctness by Angle and Dimension")
-        st.pyplot(plt)
-
-        # Angular effect on response time
-        st.write("Angular Effect on Response Time within Conditions")
-        angular_rt = filtered_data.groupby(['dimension', 'angle'])['key_resp.rt'].mean().reset_index()
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x='angle', y='key_resp.rt', hue='dimension', data=angular_rt, palette=color_p)
-        plt.title("Response Time by Angle and Dimension")
         st.pyplot(plt)
 
     except Exception as e:
