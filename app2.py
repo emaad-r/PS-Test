@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -29,33 +28,19 @@ if uploaded_file is not None:
         # Drop columns that are completely empty
         data = data.dropna(how='all', axis=1)
 
-        # Display the column types before cleaning
-        st.write("Data types before cleaning:")
-        st.write(data.dtypes)
-
         # Convert 'vivid_response' and 'strategy_response' columns to numerical, replacing 'None' with NaN
         data['vivid_response'] = pd.to_numeric(data['vivid_response'], errors='coerce')
         data['strategy_response'] = pd.to_numeric(data['strategy_response'], errors='coerce')
 
-        # Ensure wm is boolean and handle missing values
+        # Ensure 'wm' is boolean
         data['wm'] = data['wm'].astype('boolean')
-
-        # Debugging: Show unique values for the critical columns after conversion
-        st.write("Unique values in critical columns after conversion:")
-        st.write("dimension:", data['dimension'].unique())
-        st.write("angle:", data['angle'].unique())
-        st.write("wm:", data['wm'].unique())
-        st.write("key_resp.corr:", data['key_resp.corr'].unique())
-        st.write("vivid_response:", data['vivid_response'].unique())
-        st.write("strategy_response:", data['strategy_response'].unique())
-        st.write("key_resp.rt:", data['key_resp.rt'].unique())
 
         # Handle missing values: Drop rows with missing values in the critical columns
         critical_columns = ['dimension', 'angle', 'wm', 'key_resp.corr', 'vivid_response', 'strategy_response', 'key_resp.rt']
         cleaned_data = data.dropna(subset=critical_columns)
 
         # Check if the cleaned data still has valid entries
-        st.write("Data after cleaning:")
+        st.write("Data after cleaning (dropped rows with missing values in critical columns):")
         st.dataframe(cleaned_data.head())
 
         st.write("Summary of the cleaned data:")
