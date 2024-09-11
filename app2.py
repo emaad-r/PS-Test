@@ -16,74 +16,70 @@ uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"], key="file
 # Ensure that the file uploader component is visible before processing the file
 if uploaded_file is not None:
     try:
-        # Debugging: Show raw content of the file
+        # Step 1: Debug - Show the raw content of the file to verify reading
         st.write("Raw file content:")
-        st.write(uploaded_file.getvalue())
+        raw_content = uploaded_file.getvalue().decode("utf-8")
+        st.text(raw_content)  # Display raw content for further inspection
 
-        # Read the CSV file with explicit delimiter and encoding
-        data = pd.read_csv(uploaded_file, sep=',', encoding='utf-8')  # Adjust encoding or delimiter as needed
-
+        # Step 2: Read the CSV file and display columns
+        data = pd.read_csv(uploaded_file, sep=',', encoding='utf-8')  # Adjust separator and encoding if necessary
         st.success("File successfully loaded!")
 
-        # Show the column names to help debug missing columns
+        # Display the column names
         st.write("Column Names in the Data:")
-        st.write(list(data.columns))
+        st.write(data.columns.tolist())
 
-        # Display the first few rows of the data
+        # Display the first few rows of the data for inspection
         st.write("Here are the first few rows of your data:")
-        st.dataframe(data.head())
+        st.dataframe(data.head())  # First few rows for quick check
 
-        # Filter columns that are relevant
+        # Step 3: Data Cleaning - Check for missing or null values
+        st.write("Check for missing values in the data:")
+        missing_data = data.isna().sum()
+        st.write(missing_data)  # Show how many missing values are present in each column
+
+        # Step 4: Filter columns that are relevant and ensure correct data types
         filtered_data = data[['dimension', 'angle', 'wm', 'key_resp.corr', 'vivid_response', 'strategy_response', 'key_resp.rt']]
 
-        # Ensure correct data types
-        filtered_data['dimension'] = filtered_data['dimension'].astype(str)
-        filtered_data['wm'] = filtered_data['wm'].astype(bool)
-        filtered_data['strategy_response'] = filtered_data['strategy_response'].astype(str)
-
-        # Handle missing vivid_response and strategy_response data
-        filtered_data = filtered_data.dropna(subset=['vivid_response', 'strategy_response'])
+        # Ensure correct data types for the relevant columns
+        filtered_data['dimension'] = filtered_data['dimension'].astype(str)  # Ensure dimension is treated as string
+        filtered_data['wm'] = filtered_data['wm'].astype(bool)  # Ensure wm is treated as boolean
+        filtered_data['strategy_response'] = pd.to_numeric(filtered_data['strategy_response'], errors='coerce')  # Convert strategy_response to numeric
+        
+        # Step 5: Handle missing or invalid data (replace or drop as needed)
+        filtered_data = filtered_data.dropna(subset=['vivid_response', 'strategy_response'])  # Drop rows where vivid_response or strategy_response is missing
 
         st.write("Filtered data with relevant columns:")
         st.dataframe(filtered_data.head())
 
-        # Debugging: Check for 2D and wm=False data
-        st.write("Check for 2D and WM=False Data:")
-        st.write(filtered_data[(filtered_data['dimension'] == '2D') & (filtered_data['wm'] == False)])
-
-        # Debugging: Print unique values in 'dimension' and 'wm' to ensure they're being processed correctly
-        st.write("Unique values in 'dimension':", filtered_data['dimension'].unique())
+        # Debugging: Show unique values in strategy_response and wm to ensure correctness
+        st.write("Unique values in 'strategy_response':", filtered_data['strategy_response'].unique())
         st.write("Unique values in 'wm':", filtered_data['wm'].unique())
 
-        # Debugging: Print unique values in 'strategy_response' to ensure it's being processed correctly
-        st.write("Unique values in 'strategy_response':", filtered_data['strategy_response'].unique())
+        # Step 6: Visualizations
 
-        # Step 4: Visualizations
-
-        # 4.1: Correctness based on conditions
+        # 6.1: Correctness based on conditions
         st.write("Correctness by Dimension, Angle, and WM Condition")
         plt.figure(figsize=(10, 6))
         sns.barplot(x="angle", y="key_resp.corr", hue="dimension", data=filtered_data, palette=color_p)
         plt.title("Correctness by Angle and Dimension")
         st.pyplot(plt)
 
-        # 4.2: Response time as a function of conditions
+        # 6.2: Response time as a function of conditions
         st.write("Response Time by Dimension, Angle, and WM Condition")
         plt.figure(figsize=(10, 6))
         sns.barplot(x="angle", y="key_resp.rt", hue="dimension", data=filtered_data, palette=color_p)
         plt.title("Response Time by Angle and Dimension")
         st.pyplot(plt)
 
-        # 4.3: Vividness and strategy response by condition
-
-        # Fixing the boxplot to ensure correct handling of data
+        # 6.3: Vividness and strategy response by condition
         st.write("Vividness Response by Dimension and WM Condition")
         plt.figure(figsize=(10, 6))
         sns.boxplot(x="dimension", y="vivid_response", hue="wm", data=filtered_data, palette=color_p)
         plt.title("Vividness Response by Dimension and WM Condition")
         st.pyplot(plt)
 
-        # 4.4: Strategy response by condition
+        # 6.4: Strategy response by condition
         st.write("Strategy Response by Dimension and WM Condition")
         plt.figure(figsize=(10, 6))
         sns.barplot(x="dimension", y="strategy_response", hue="wm", data=filtered_data, palette=color_p)
