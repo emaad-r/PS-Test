@@ -16,8 +16,12 @@ uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"], key="file
 # Ensure that the file uploader component is visible before processing the file
 if uploaded_file is not None:
     try:
-        # Read the CSV file
-        data = pd.read_csv(uploaded_file)
+        # Debugging: Show raw content of the file
+        st.write("Raw file content:")
+        st.write(uploaded_file.getvalue())
+
+        # Read the CSV file with explicit delimiter and encoding
+        data = pd.read_csv(uploaded_file, sep=',', encoding='utf-8')  # Adjust encoding or delimiter as needed
 
         st.success("File successfully loaded!")
 
@@ -43,9 +47,16 @@ if uploaded_file is not None:
         st.write("Filtered data with relevant columns:")
         st.dataframe(filtered_data.head())
 
-        # Step 3: Check for data in the 2D and wm=False combination
+        # Debugging: Check for 2D and wm=False data
         st.write("Check for 2D and WM=False Data:")
         st.write(filtered_data[(filtered_data['dimension'] == '2D') & (filtered_data['wm'] == False)])
+
+        # Debugging: Print unique values in 'dimension' and 'wm' to ensure they're being processed correctly
+        st.write("Unique values in 'dimension':", filtered_data['dimension'].unique())
+        st.write("Unique values in 'wm':", filtered_data['wm'].unique())
+
+        # Debugging: Print unique values in 'strategy_response' to ensure it's being processed correctly
+        st.write("Unique values in 'strategy_response':", filtered_data['strategy_response'].unique())
 
         # Step 4: Visualizations
 
